@@ -454,6 +454,28 @@
             }
         }
 
+        .message-sequence {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff3838 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 150;
+            }
+
+            .message-display {
+                font-size: clamp(1.5rem, 4vw, 2.5rem);
+                color: #ffd700;
+                text-align: center;
+                max-width: 80%;
+                padding: 20px;
+                font-weight: bold;
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            }
         @media (max-width: 768px) {
             .message-card {
                 padding: 20px;
@@ -471,6 +493,35 @@
             .decoy-content {
                 margin: 1rem;
                 padding: 1rem;
+            }
+
+            
+
+            .fade-in {
+                animation: fadeInMessage 1s ease-out;
+            }
+
+            @keyframes fadeInMessage {
+                0% { opacity: 0; transform: scale(0.8); }
+                100% { opacity: 1; transform: scale(1); }
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            @keyframes messageGlow {
+                0% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+                100% { text-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+            }
+
+            .fade-in {
+                animation: fadeInMessage 1s ease-out;
+            }
+
+            @keyframes fadeInMessage {
+                0% { opacity: 0; transform: scale(0.8); }
+                100% { opacity: 1; transform: scale(1); }
             }
         }
     </style>
@@ -511,11 +562,17 @@
         </div>
     </div>
 
+    <!-- Message Sequence -->
+    <!-- Message Sequence -->
+    <div class="message-sequence hidden" id="messageSequence">
+        <p id="messageDisplay" class="message-display hidden"></p>
+    </div>
+
     <!-- BIRTHDAY CONTENT -->
     <div class="birthday-body" id="birthdayContent">
         <!-- First Video Container -->
         <div class="video-container" id="videoContainer1">
-            <video class="birthday-video" id="birthdayVideo1" autoplay>
+            <video class="birthday-video" id="birthdayVideo1" muted>
                 <source src="Baby.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
@@ -523,7 +580,7 @@
         
         <!-- Second Video Container -->
         <div class="video-container" id="videoContainer2">
-            <video class="birthday-video" id="birthdayVideo2" autoplay>
+            <video class="birthday-video" id="birthdayVideo2" muted>
                 <source src="Euca.mp4" type="video/mp4">
                 <!-- Add your second video filename here -->
                 Your browser does not support the video tag.
@@ -532,7 +589,7 @@
         
         <!-- Third Video Container -->
         <div class="video-container" id="videoContainer3">
-            <video class="birthday-video" id="birthdayVideo3" autoplay>
+            <video class="birthday-video" id="birthdayVideo3" muted>
                 <source src="Bebeng.mp4" type="video/mp4">
                 <!-- Add your third video filename here -->
                 Your browser does not support the video tag.
@@ -540,7 +597,7 @@
         </div>
 
         <div class="video-container" id="videoContainer4">
-            <video class="birthday-video" id="birthdayVideo4" autoplay>
+            <video class="birthday-video" id="birthdayVideo4" muted>
                 <source src="eugene.mp4" type="video/mp4">
                 <!-- Add your third video filename here -->
                 Your browser does not support the video tag.
@@ -549,7 +606,7 @@
 
 
         <div class="video-container" id="videoContainer5">
-            <video class="birthday-video" id="birthdayVideo5" autoplay>
+            <video class="birthday-video" id="birthdayVideo5" muted>
                 <source src="eunice.mp4" type="video/mp4">
                 <!-- Add your third video filename here -->
                 Your browser does not support the video tag.
@@ -557,7 +614,7 @@
         </div>
 
         <div class="video-container" id="videoContainer6">
-            <video class="birthday-video" id="birthdayVideo6" autoplay>
+            <video class="birthday-video" id="birthdayVideo6" muted>
                 <source src="Ate.mp4" type="video/mp4">
                 <!-- Add your third video filename here -->
                 Your browser does not support the video tag.
@@ -565,7 +622,7 @@
         </div>
 
         <div class="video-container" id="videoContainer7">
-            <video class="birthday-video" id="birthdayVideo7" autoplay>
+            <video class="birthday-video" id="birthdayVideo7" muted>
                 <source src="kuya.mp4" type="video/mp4">
                 <!-- Add your third video filename here -->
                 Your browser does not support the video tag.
@@ -573,7 +630,7 @@
         </div>
 
         <div class="video-container" id="videoContainer8">
-            <video class="birthday-video" id="birthdayVideo8" autoplay>
+            <video class="birthday-video" id="birthdayVideo8" muted>
                 <source src="ate_tina.mp4" type="video/mp4">
                 <!-- Add your third video filename here -->
                 Your browser does not support the video tag.
@@ -581,7 +638,7 @@
         </div>
 
         <div class="video-container" id="videoContainer9">
-            <video class="birthday-video" id="birthdayVideo9" autoplay>
+            <video class="birthday-video" id="birthdayVideo9" muted>
                 <source src="mommy.mp4" type="video/mp4">
                 <!-- Add your third video filename here -->
                 Your browser does not support the video tag.
@@ -693,10 +750,14 @@
                 const video = document.getElementById(currentVideo.video);
                 video.volume = 1;
                 // Add active class for smooth transition
+                // Add active class for smooth transition
                 container.classList.add('active');
-                
-                // Play the video
-                video.play().catch(e => console.log('Video play failed:', e));
+
+                // Start muted to avoid autoplay restrictions, then unmute
+                video.muted = true;
+                video.play().then(() => {
+                    video.muted = false; // Unmute after successful play start
+                }).catch(e => console.log('Video play failed:', e));
                 
                 // Listen for video end
                 video.addEventListener('ended', function() {
@@ -745,37 +806,30 @@
         }
 
         function triggerSurprise() {
-            // Show loading
-            document.getElementById('loading').style.display = 'block';
+        // Show loading
+        document.getElementById('loading').style.display = 'block';
+        
+        // After 2 seconds, hide decoy and show message sequence
+        setTimeout(() => {
+            const decoyContent = document.getElementById('decoyContent');
+            const messageSequence = document.getElementById('messageSequence');
+            const body = document.body;
             
-            // After 2 seconds, hide decoy and show birthday content
+            // Fade out decoy content
+            decoyContent.classList.add('fade-out');
+            
             setTimeout(() => {
-                const decoyContent = document.getElementById('decoyContent');
-                const birthdayContent = document.getElementById('birthdayContent');
-                const body = document.body;
+                // Hide decoy and show message sequence
+                decoyContent.classList.add('hidden');
+                body.className = '';
+                messageSequence.classList.remove('hidden');
                 
-                // Fade out decoy content
-                decoyContent.classList.add('fade-out');
+                // Start message sequence
+                showMessages();
                 
-                setTimeout(() => {
-                    // Hide decoy and show birthday
-                    decoyContent.classList.add('hidden');
-                    body.className = '';
-                    birthdayContent.style.display = 'block';
-                    birthdayContent.classList.add('fade-in');
-                    
-                    // Start play.mp3 when video container appears
-                    const playMusic = document.getElementById('playMusic');
-                    playMusic.volume = 0.1;
-                    playMusic.play().catch(e => console.log('Play music failed:', e));
-                    
-                    // Start video sequence
-                    currentVideoIndex = 0;
-                    playNextVideo();
-                    
-                }, 2000);
             }, 2000);
-        }
+        }, 2000);
+    }
 
         function celebrate() {
             // Create more confetti
@@ -787,6 +841,65 @@
             setTimeout(() => {
                 button.style.transform = '';
             }, 200);
+        }
+
+        function showMessages() {
+    // Start play.mp3 with volume 0.5 when messages start
+    const playMusic = document.getElementById('playMusic');
+    playMusic.volume = 0.5;
+    playMusic.play().catch(e => console.log('Play music failed:', e));
+    
+    let messages = [
+        "Hi Mama! 👋",
+        "Surprise! 🎉",
+        "Today is your special day! ✨",
+        "50 years of amazing memories! 💖",
+        "We prepared something special for you...",
+        "From all of us who love you! 💕",
+        "Get ready for the celebration! 🎂"
+    ];
+    
+    let messageDisplay = document.getElementById("messageDisplay");
+    let index = 0;
+
+    function displayNextMessage() {
+        if (index < messages.length) {
+            messageDisplay.textContent = messages[index];
+            messageDisplay.classList.remove("hidden");
+            messageDisplay.classList.add("fade-in");
+            setTimeout(() => {
+                messageDisplay.classList.remove("fade-in");
+                messageDisplay.classList.add("hidden");
+                index++;
+                setTimeout(displayNextMessage, 1000);
+            }, 3000);
+        } else {
+            setTimeout(() => {
+                startVideoSequence();
+            }, 1000);
+        }
+    }
+    displayNextMessage();
+}
+
+        function startVideoSequence() {
+            // Lower play.mp3 volume to 0.1 when videos start
+            const playMusic = document.getElementById('playMusic');
+            playMusic.volume = 0.1;
+            
+            // Hide message sequence
+            // Hide message sequence
+            const messageSequence = document.getElementById('messageSequence');
+            messageSequence.classList.add('hidden');
+                
+            // Show birthday content and start videos
+            const birthdayContent = document.getElementById('birthdayContent');
+            birthdayContent.style.display = 'block';
+            birthdayContent.classList.add('fade-in');
+            
+            // Start video sequence
+            currentVideoIndex = 0;
+            playNextVideo();
         }
 
         function createStars() {

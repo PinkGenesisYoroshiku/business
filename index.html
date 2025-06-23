@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Document Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* DECOY STYLES */
+        .decoy-body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .decoy-header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .decoy-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .decoy-button {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: background 0.3s;
+        }
+
+        .decoy-button:hover {
+            background: #2980b9;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* BIRTHDAY STYLES */
+        .birthday-body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #ffb3b3 0%, #ff8080 50%, #ffcccc 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: none;
+        }
+
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            gap: 20px;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .video-container.active {
+            opacity: 1;
+        }
+
+        .birthday-video {
+            max-width: 60%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.5s ease-out;
+        }
+
+        .video-container.active .birthday-video {
+            transform: scale(1);
+        }
+
+        .side-gif {
+            max-width: 30%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            animation: gifBounce 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes gifBounce {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(-10px) scale(1.02); }
+        }
+
+        @media (max-width: 768px) {
+            .video-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .birthday-video {
+                max-width: 90%;
+                max-height: 60%;
+            }
+            
+            .side-gif {
+                max-width: 70%;
+                max-height: 30%;
+            }
+        }
+
+        .profile-picture {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            animation: profileGlow 2s ease-in-out infinite alternate;
+            margin-bottom: 20px;
+        }
+
+        @keyframes profileGlow {
+            0% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.8); }
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite, bounce 2s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .name-display {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: bold;
+            color: #ffd700;
+            text-align: center;
+            margin: 20px 0;
+            animation: glow 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+        }
+
+        .age-display {
+            font-size: clamp(4rem, 15vw, 12rem);
+            font-weight: bold;
+            color: #ffd700;
+            text-align: center;
+            margin: 30px 0;
+            animation: glow 2s ease-in-out infinite alternate, rotate360 10s linear infinite;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+            position: relative;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+            100% { text-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.6); }
+        }
+
+        @keyframes rotate360 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            text-align: center;
+            margin: 30px 0;
+            animation: slideUp 1s ease-out 0.5s both, pulse 3s ease-in-out infinite;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideUp {
+            0% { transform: translateY(50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .message-text {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: white;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .celebration-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .icon {
+            font-size: 3rem;
+            animation: dance 2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .icon:nth-child(1) { animation-delay: 0s; }
+        .icon:nth-child(2) { animation-delay: 0.2s; }
+        .icon:nth-child(3) { animation-delay: 0.4s; }
+        .icon:nth-child(4) { animation-delay: 0.6s; }
+        .icon:nth-child(5) { animation-delay: 0.8s; }
+
+        @keyframes dance {
+            0%, 50%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(5deg); }
+            75% { transform: translateY(-8px) rotate(-5deg); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            animation: confetti-fall 3s linear infinite;
+            z-index: 2;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .wishes-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .wish-item {
+            color: #ffd700;
+            font-size: 1.3rem;
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 4px solid #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 0 10px 10px 0;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            0% { transform: translateX(-50px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .celebration-button {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            animation: buttonGlow 2s ease-in-out infinite;
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .celebration-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes buttonGlow {
+            0%, 100% { box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 15px 30px rgba(255, 215, 0, 0.6); }
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .balloon {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(2deg); }
+            66% { transform: translateY(-10px) rotate(-2deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-out {
+            animation: fadeOutDecoy 2s ease-out forwards;
+        }
+
+        .fade-in {
+            animation: fadeInBirthday 2s ease-out forwards;
+        }
+
+        @keyframes fadeOutDecoy {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+
+        @keyframes fadeInBirthday {
+            0% { opacity: 0; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .floating-cake {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: floatCake 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        @keyframes floatCake {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg) scale(1); 
+                opacity: 0.8;
+            }
+            25% { 
+                transform: translateY(-30px) rotate(5deg) scale(1.1); 
+                opacity: 1;
+            }
+            50% { 
+                transform: translateY(-15px) rotate(-3deg) scale(0.9); 
+                opacity: 0.9;
+            }
+            75% { 
+                transform: translateY(-25px) rotate(8deg) scale(1.05); 
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .message-card {
+                padding: 20px;
+                margin: 20px 10px;
+            }
+            
+            .celebration-icons {
+                gap: 15px;
+            }
+            
+            .icon {
+                font-size: 2rem;
+            }
+
+            .decoy-content {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="decoy-body">
+    <!-- DECOY CONTENT -->
+    <div id="decoyContent">
+        <div class="decoy-header">
+            <h1>Business Document Portal</h1>
+            <p>Secure Document Management System</p>
+        </div>
+        
+        <div class="decoy-content">
+            <h2>Document Access Request</h2>
+            <p>Please verify your access credentials to view the requested business documents. This portal provides secure access to important corporate files and reports.</p>
+            
+            <div style="margin: 20px 0;">
+                <label for="username">Username:</label><br>
+                <input type="text" id="username" style="width: 100%; padding: 8px; margin: 5px 0;">
+                
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" style="width: 100%; padding: 8px; margin: 5px 0;">
+            </div>
+            
+            <button class="decoy-button" onclick="triggerSurprise()">Access Documents</button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Authenticating and loading documents...</p>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 15px; background: #ecf0f1; border-radius: 4px;">
+                <h3>System Information</h3>
+                <p><strong>Server Status:</strong> Online</p>
+                <p><strong>Last Updated:</strong> June 23, 2025</p>
+                <p><strong>Security Level:</strong> High</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIRTHDAY CONTENT -->
+    <div class="birthday-body" id="birthdayContent">
+        <!-- First Video Container -->
+        <div class="video-container" id="videoContainer1">
+            <video class="birthday-video" id="birthdayVideo1" autoplay>
+                <source src="app.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <!-- Second Video Container -->
+        <div class="video-container" id="videoContainer2">
+            <video class="birthday-video" id="birthdayVideo2" autoplay>
+                <source src="ate_tina.mp4" type="video/mp4">
+                <!-- Add your second video filename here -->
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <!-- Third Video Container -->
+        <div class="video-container" id="videoContainer3">
+            <video class="birthday-video" id="birthdayVideo3" autoplay>
+                <source src="mommy.mp4" type="video/mp4">
+                <!-- Add your third video filename here -->
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <div class="video-container" id="videoContainer4">
+            <video class="birthday-video" id="birthdayVideo4" autoplay>
+                <source src="kuya.mp4" type="video/mp4">
+                <!-- Add your third video filename here -->
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Main Birthday Content -->
+        <div id="mainBirthdayContent" style="display: none;">
+            <div class="stars" id="stars"></div>
+            <div class="floating-elements" id="floatingElements"></div>
+            
+            <div class="container">
+                <h1 class="main-title">SURPRISE!</h1>
+                <h2 class="main-title">Happy Birthday!</h2>
+                
+                <img src="mama2.jpg" alt="Birthday Person" class="profile-picture" id="profilePicture">
+                <div class="name-display" id="celebrantName">MAMA</div>
+                <div class="age-display">50</div>
+            
+            <div class="message-card">
+                <p class="message-text">
+                    🌟 Celebrating 50 incredible years of life, love, and laughter! 🌟
+                </p>
+                <p class="message-text">
+                    Half a century of amazing memories, beautiful moments, and wonderful achievements. 
+                    Here's to the golden milestone that marks not just age, but wisdom, experience, and the beauty of a life well-lived!
+                </p>
+            </div>
+
+            <div class="celebration-icons">
+                <div class="icon">🎂</div>
+                <div class="icon">🎉</div>
+                <div class="icon">🥳</div>
+                <div class="icon">🎈</div>
+                <div class="icon">✨</div>
+            </div>
+
+            <div class="wishes-section">
+                <div class="wish-item">🎯 May this new decade bring you endless joy and adventure!</div>
+                <div class="wish-item">💖 Wishing you health, happiness, and all your heart desires!</div>
+                <div class="wish-item">🌈 Here's to 50 more years of incredible memories!</div>
+                <div class="wish-item">🎊 You're not getting older, you're getting more awesome!</div>
+            </div>
+
+            <button class="celebration-button" onclick="celebrate()">
+                🎉 Let's Celebrate More! 🎉
+            </button>
+        </div>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="backgroundMusic" loop preload="auto">
+        <source src="videoplayback.m4a" type="audio/mp4">
+        Your browser does not support the audio element.
+    </audio>
+
+    <audio id="playMusic" preload="auto">
+        <source src="play.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        // Video sequence management
+        let currentVideoIndex = 0;
+        const videoSequence = [
+            { container: 'videoContainer1', video: 'birthdayVideo1' },
+            { container: 'videoContainer2', video: 'birthdayVideo2' },
+            { container: 'videoContainer3', video: 'birthdayVideo3' },
+            { container: 'videoContainer4', video: 'birthdayVideo4' }
+        ];
+
+        function createFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            const balloons = ['🎈', '🎂', '🌟', '💖', '🎊'];
+            
+            // Create regular floating elements
+            for (let i = 0; i < 8; i++) {
+                const balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                balloon.textContent = balloons[Math.floor(Math.random() * balloons.length)];
+                balloon.style.left = Math.random() * 90 + '%';
+                balloon.style.top = Math.random() * 80 + 20 + '%';
+                balloon.style.animationDelay = Math.random() * 6 + 's';
+                balloon.style.animationDuration = (Math.random() * 3 + 6) + 's';
+                container.appendChild(balloon);
+            }
+            
+            // Create floating cakes
+            for (let i = 0; i < 12; i++) {
+                const cake = document.createElement('div');
+                cake.className = 'floating-cake';
+                cake.textContent = '🎂';
+                cake.style.left = Math.random() * 95 + '%';
+                cake.style.top = Math.random() * 90 + '%';
+                cake.style.animationDelay = Math.random() * 8 + 's';
+                cake.style.animationDuration = (Math.random() * 4 + 8) + 's';
+                container.appendChild(cake);
+            }
+        }
+
+        function playNextVideo() {
+            if (currentVideoIndex < videoSequence.length) {
+                const currentVideo = videoSequence[currentVideoIndex];
+                const container = document.getElementById(currentVideo.container);
+                const video = document.getElementById(currentVideo.video);
+                
+                // Add active class for smooth transition
+                container.classList.add('active');
+                
+                // Play the video
+                video.play().catch(e => console.log('Video play failed:', e));
+                
+                // Listen for video end
+                video.addEventListener('ended', function() {
+                    // Start fade out transition
+                    container.classList.remove('active');
+                    
+                    // Wait for fade out to complete before moving to next video
+                    setTimeout(() => {
+                        currentVideoIndex++;
+                        
+                        if (currentVideoIndex < videoSequence.length) {
+                            // Play next video
+                            playNextVideo();
+                        } else {
+                            // All videos finished, show main content
+                            showMainContent();
+                        }
+                    }, 800); // Match the CSS transition duration
+                });
+            }
+        }
+
+        function showMainContent() {
+            // Hide all video containers
+            videoSequence.forEach(video => {
+                const container = document.getElementById(video.container);
+                container.style.display = 'none';
+            });
+            
+            document.getElementById('mainBirthdayContent').style.display = 'block';
+            
+            // Stop play.mp3 music
+            const playMusic = document.getElementById('playMusic');
+            playMusic.pause();
+            playMusic.currentTime = 0;
+            
+            // Create visual effects
+            createStars();
+            createFloatingElements();
+            createConfetti();
+            
+            // Start background music
+            const bgMusic = document.getElementById('backgroundMusic');
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(e => console.log('Background music play failed:', e));
+        }
+
+        function triggerSurprise() {
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            
+            // After 2 seconds, hide decoy and show birthday content
+            setTimeout(() => {
+                const decoyContent = document.getElementById('decoyContent');
+                const birthdayContent = document.getElementById('birthdayContent');
+                const body = document.body;
+                
+                // Fade out decoy content
+                decoyContent.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    // Hide decoy and show birthday
+                    decoyContent.classList.add('hidden');
+                    body.className = '';
+                    birthdayContent.style.display = 'block';
+                    birthdayContent.classList.add('fade-in');
+                    
+                    // Start play.mp3 when video container appears
+                    const playMusic = document.getElementById('playMusic');
+                    playMusic.volume = 0.2;
+                    playMusic.play().catch(e => console.log('Play music failed:', e));
+                    
+                    // Start video sequence
+                    currentVideoIndex = 0;
+                    playNextVideo();
+                    
+                }, 2000);
+            }, 2000);
+        }
+
+        function celebrate() {
+            // Create more confetti
+            createConfetti();
+            
+            // Add extra celebration effects
+            const button = event.target;
+            button.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 200);
+        }
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 50;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = (Math.random() * 3 + 1) + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                document.body.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 6000);
+            }
+        }
+    </script>
+</body>
+</html>

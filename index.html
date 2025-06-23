@@ -691,6 +691,7 @@
                 const currentVideo = videoSequence[currentVideoIndex];
                 const container = document.getElementById(currentVideo.container);
                 const video = document.getElementById(currentVideo.video);
+                video.volume = 1;
                 
                 // Add active class for smooth transition
                 container.classList.add('active');
@@ -740,7 +741,7 @@
             
             // Start background music
             const bgMusic = document.getElementById('backgroundMusic');
-            bgMusic.volume = 0.3;
+            bgMusic.volume = 0.5;
             bgMusic.play().catch(e => console.log('Background music play failed:', e));
         }
 
@@ -766,7 +767,7 @@
                     
                     // Start play.mp3 when video container appears
                     const playMusic = document.getElementById('playMusic');
-                    playMusic.volume = 0.2;
+                    playMusic.volume = 0.1;
                     playMusic.play().catch(e => console.log('Play music failed:', e));
                     
                     // Start video sequence
